@@ -1,0 +1,30 @@
+# Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
+my_key=dbutils.secrets.get(scope="my_secret_scope_2", key="my_key")
+print(my_key)
+
+# COMMAND ----------
+
+from pyspark.sql import SparkSession
+
+# JDBC connection properties
+jdbc_url = "jdbc:databricks://dbc-c512e9d3-bf98.cloud.databricks.com:443/default;transportMode=http;ssl=1;AuthMech=3;httpPath=/sql/1.0/warehouses/d59bddd7f7b1df37;"
+
+access_token = my_key
+
+# SQL query or table
+query = "(SELECT * FROM samples.bakehouse.sales_franchises LIMIT 100) AS t"
+
+# Read data
+df = spark.read \
+    .format("jdbc") \
+    .option("url", jdbc_url) \
+    .option("query", query) \
+    .option("user", "token") \
+    .option("password", access_token) \
+    .load()
+
+display(df)
